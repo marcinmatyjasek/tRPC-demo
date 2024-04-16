@@ -1,8 +1,10 @@
 import { useReducer } from "react";
 import { Label } from "@radix-ui/react-label";
+
 import { CreateTodoItemInput } from "@/models";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { trpc } from "@/trpc";
 
 const DEFAULT_CREATE_TODO_ITEM_STATE: CreateTodoItemInput = {
   title: "",
@@ -18,7 +20,13 @@ export const CreateTodoItem = () => {
     DEFAULT_CREATE_TODO_ITEM_STATE
   );
 
-  // TODO: implement createTodo mutation
+  const trpcUtils = trpc.useUtils();
+  const { mutate: createTodo } = trpc.todo.create.useMutation({
+    onSuccess: async () => {
+      await trpcUtils.todo.get.invalidate();
+      setNewItem(DEFAULT_CREATE_TODO_ITEM_STATE);
+    },
+  });
 
   return (
     <div className="flex flex-col gap-3">
@@ -45,7 +53,7 @@ export const CreateTodoItem = () => {
           })
         }
       />
-      <Button onClick={() => console.log("Add todo", newItem)}>Add</Button>
+      <Button onClick={() => createTodo(newItem)}>Add</Button>
     </div>
   );
 };

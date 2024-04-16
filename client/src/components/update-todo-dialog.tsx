@@ -1,3 +1,5 @@
+import { FC, useReducer } from "react";
+
 import {
   DialogClose,
   DialogContent,
@@ -10,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UpdateTodoItemInput } from "@/models";
-import { FC, useReducer } from "react";
+import { trpc } from "@/trpc";
 
 interface EditTodoDialogProps {
   item: UpdateTodoItemInput;
@@ -29,7 +31,13 @@ export const UpdateTodoDialog: FC<EditTodoDialogProps> = ({
     item
   );
 
-  // TODO: implement updateTodo mutation
+  const trpcUtils = trpc.useUtils();
+  const { mutate: updateTodo } = trpc.todo.update.useMutation({
+    onSuccess: () => {
+      trpcUtils.todo.invalidate();
+      onSuccess?.();
+    },
+  });
 
   return (
     <DialogContent className="w-96 p-4">
@@ -63,13 +71,7 @@ export const UpdateTodoDialog: FC<EditTodoDialogProps> = ({
           <Button variant="outline">Cancel</Button>
         </DialogClose>
 
-        <Button
-          type="submit"
-          onClick={() => {
-            console.log("updateItem", updatedItem);
-            onSuccess?.();
-          }}
-        >
+        <Button type="submit" onClick={() => updateTodo(updatedItem)}>
           Save
         </Button>
       </DialogFooter>

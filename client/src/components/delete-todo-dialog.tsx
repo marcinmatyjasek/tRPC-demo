@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { trpc } from "@/trpc";
 
 interface DeleteTodoDialogProps {
   itemId: number;
@@ -19,7 +20,13 @@ export const DeleteTodoDialog: FC<DeleteTodoDialogProps> = ({
   itemId,
   onSuccess,
 }) => {
-  // TODO: Implement deleteTodo mutation
+  const trpcUtils = trpc.useUtils();
+  const { mutate: deleteTodo } = trpc.todo.delete.useMutation({
+    onSuccess: async () => {
+      await trpcUtils.todo.get.invalidate();
+      onSuccess?.();
+    },
+  });
 
   return (
     <DialogContent className="w-96 p-4">
@@ -33,13 +40,7 @@ export const DeleteTodoDialog: FC<DeleteTodoDialogProps> = ({
         <DialogClose asChild>
           <Button variant="outline">Cancel</Button>
         </DialogClose>
-        <Button
-          variant="destructive"
-          onClick={() => {
-            console.log("delete todo", itemId);
-            onSuccess?.();
-          }}
-        >
+        <Button variant="destructive" onClick={() => deleteTodo(itemId)}>
           Delete
         </Button>
       </DialogFooter>

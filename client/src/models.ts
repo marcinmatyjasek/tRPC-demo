@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { RouterInputs, RouterOutputs } from "./trpc";
 
-// TODO: Define the types for the models
-
-export type TodoItemList = any;
-export type TodoItem = any;
-export type CreateTodoItemInput = any;
-export type UpdateTodoItemInput = any;
+export type TodoItemList = RouterOutputs["todo"]["get"];
+export type TodoItem = TodoItemList[number];
+export type CreateTodoItemInput = RouterInputs["todo"]["create"];
+export type UpdateTodoItemInput = RouterInputs["todo"]["update"];

@@ -9,6 +9,7 @@ import { TodoItem } from "@/models";
 import { UpdateTodoDialog } from "./update-todo-dialog";
 import { DeleteTodoDialog } from "./delete-todo-dialog";
 import { cn } from "@/lib/utils";
+import { trpc } from "@/trpc";
 
 interface TodoListItemProps {
   item: TodoItem;
@@ -18,13 +19,19 @@ export const TodoListItem: FC<TodoListItemProps> = ({ item }) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // TODO: Implement toggleIsCompleted mutation
-
+  const trpcUtils = trpc.useUtils();
+  const { mutate: toggleIsCompleted } = trpc.todo.update.useMutation({
+    onSuccess: () => {
+      trpcUtils.todo.invalidate();
+    },
+  });
   return (
     <Card className="p-4 flex items-center gap-2 cursor-pointer">
       <Checkbox
         checked={item.isCompleted}
-        onCheckedChange={(value) => console.log("toggleIsCompleted", value)}
+        onCheckedChange={(value) =>
+          toggleIsCompleted({ ...item, isCompleted: value as boolean })
+        }
       />
       <div className={cn(item.isCompleted && "line-through")}>
         <p className="leading-7 line-clamp-1 font-semibold">{item.title}</p>
